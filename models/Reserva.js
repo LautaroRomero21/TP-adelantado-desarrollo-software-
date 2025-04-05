@@ -1,14 +1,25 @@
-const mongoose = require('mongoose');
+class Reserva {
+    constructor({ alojamiento, huesped, fechaInicio, fechaFin, estado = 'pendiente' }) {
+        if (!alojamiento) throw new Error('El alojamiento es obligatorio');
+        if (!huesped) throw new Error('El huésped es obligatorio');
+        if (!fechaInicio || !fechaFin) throw new Error('Las fechas de inicio y fin son obligatorias');
 
-const reservaSchema = new mongoose.Schema({
-    alojamiento: { type: mongoose.Schema.Types.ObjectId, ref: 'Alojamiento', required: true },
-    huesped: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
-    fechaInicio: { type: Date, required: true },
-    fechaFin: { type: Date, required: true },
-    estado: { type: String, enum: ['pendiente', 'confirmada', 'cancelada'], default: 'pendiente' },
-}, {
-    timestamps: true
-});
+        this.alojamiento = alojamiento;
+        this.huesped = huesped;
+        this.fechaInicio = new Date(fechaInicio);
+        this.fechaFin = new Date(fechaFin);
 
-module.exports = mongoose.model('Reserva', reservaSchema);
+        const estadosValidos = ['pendiente', 'confirmada', 'cancelada'];
+        if (!estadosValidos.includes(estado)) {
+            throw new Error(`Estado inválido: ${estado}`);
+        }
 
+        this.estado = estado;
+
+        // timestamps
+        this.createdAt = new Date();
+        this.updatedAt = new Date();
+    }
+}
+
+module.exports = Reserva;

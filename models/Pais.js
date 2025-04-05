@@ -1,12 +1,11 @@
-const mongoose = require('mongoose');
+class Pais {
+    constructor({ nombre }) {
+        if (!nombre || typeof nombre !== 'string') {
+            throw new Error('El nombre es obligatorio y debe ser un string');
+        }
 
-const paisSchema = new mongoose.Schema({
-    nombre: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true
+        this.nombre = nombre.trim();
     }
-});
+}
 
-module.exports = mongoose.model('Pais', paisSchema);
+module.exports = Pais;

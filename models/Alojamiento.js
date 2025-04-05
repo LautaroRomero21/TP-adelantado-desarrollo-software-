@@ -1,68 +1,63 @@
-const mongoose = require('mongoose');
-const fotoSchema = require('./Foto');
+const Foto = require('./Foto');
 
-const alojamientoSchema = new mongoose.Schema({
-    anfitrion: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
-    nombre: { type: String, required: true },
-    descripcion: { type: String, required: true },
-    precioPorNoche: { type: Number, required: true },
-    moneda: { type: String, default: 'USD' },
-    horarioCheckIn: { type: String },
-    horarioCheckOut: { type: String },
-    direccion: { type: mongoose.Schema.Types.ObjectId, ref: 'Direccion', required: true },
-    cantHuespedesMax: { type: Number, required: true },
-    caracteristicas: { type: String, enum: ['WIFI', 'PISCINA', 'MASCOTAS_PERMITIDAS', 'ESTACIONAMIENTO'] },
-    reservas: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reserva' }],
-    fotos: [fotoSchema]
-}, {
-    timestamps: true
-});
-
-/// ------------------------------
-/// Métodos personalizados
-/// ------------------------------
-alojamientoSchema.methods.estasDisponibleEn = async function (rangoFechas) {
-    const Reserva = mongoose.model('Reserva');
-
-    // Obtener todas las reservas asociadas al alojamiento
-    const reservas = await Reserva.find({
-        _id: { $in: this.reservas },
-        estado: { $in: ['pendiente', 'confirmada'] }
-    });
-
-    // Revisar si hay superposición entre alguna reserva y el rango dado
-    for (const reserva of reservas) {
-        const inicioExistente = new Date(reserva.fechaInicio);
-        const finExistente = new Date(reserva.fechaFin);
-
-        const inicioSolicitado = new Date(rangoFechas.fechaInicio);
-        const finSolicitado = new Date(rangoFechas.fechaFin);
-
-        const haySuperposicion = (
-            inicioSolicitado <= finExistente &&
-            finSolicitado >= inicioExistente
-        );
-
-        if (haySuperposicion) {
-            return false; // No está disponible
-        }
+class Alojamiento {
+    constructor({
+        anfitrion,
+        nombre,
+        descripcion,
+        precioPorNoche,
+        moneda = 'USD',
+        horarioCheckIn,
+        horarioCheckOut,
+        direccion,
+        cantHuespedesMax,
+        caracteristicas,
+        reservas = [],
+        fotos = [],
+        createdAt = new Date(),
+        updatedAt = new Date()
+    }) {
+        this.anfitrion = anfitrion;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.precioPorNoche = precioPorNoche;
+        this.moneda = moneda;
+        this.horarioCheckIn = horarioCheckIn;
+        this.horarioCheckOut = horarioCheckOut;
+        this.direccion = direccion;
+        this.cantHuespedesMax = cantHuespedesMax;
+        this.caracteristicas = caracteristicas;
+        this.reservas = reservas;
+        this.fotos = fotos.map(f => new Foto(f));
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
-    return true; // Está disponible
-};
+    estasDisponibleEn(rangoFechas) {
+        // Verificar si el rango de fechas del alojamiento no se solapa con las reservas existentes
+        for (const reserva of this.reservas) {
+            // Comprobar si las fechas de la reserva se solapan con el rangoFechas
+            if (
+                (rangoFechas.fechaInicio < reserva.fechaFin && rangoFechas.fechaFin > reserva.fechaInicio)
+            ) {
+                return false; // Si las fechas se solapan, no está disponible
+            }
+        }
+        return true; // Si no hay solapamientos, está disponible
+    }
 
-alojamientoSchema.methods.tuPrecioEstaDentroDe = function (valorMinimo, valorMaximo) {
-    return this.precioPorNoche >= valorMinimo && this.precioPorNoche <= valorMaximo;
-};
 
-alojamientoSchema.methods.tenesCaracteristica = function (caracteristica) {
-    return this.caracteristicas.includes(caracteristica);
-};
+    tuPrecioEstaDentroDe(valorMinimo, valorMaximo) {
+        return this.precioPorNoche >= valorMinimo && this.precioPorNoche <= valorMaximo;
+    }
 
-alojamientoSchema.methods.puedenAlojarse = function (cantHuespedes) {
-    return cantHuespedes <= this.cantHuespedesMax;
-};
+    tenesCaracteristica(caracteristica) {
+        return this.caracteristicas.includes(caracteristica);
+    }
 
-/// ------------------------------
+    puedenAlojarse(cantHuespedes) {
+        return cantHuespedes <= this.cantHuespedesMax;
+    }
+}
 
-module.exports = mongoose.model('Alojamiento', alojamientoSchema);
+module.exports = Alojamiento;

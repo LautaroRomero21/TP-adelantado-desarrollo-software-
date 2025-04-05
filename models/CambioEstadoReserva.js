@@ -1,31 +1,26 @@
-const mongoose = require('mongoose');
+class CambioEstadoReserva {
+    constructor({
+        fecha = new Date(),
+        estado,
+        reserva,
+        motivo = null,
+        usuario
+    }) {
+        if (!estado) throw new Error('El estado es obligatorio');
+        if (!reserva) throw new Error('La reserva es obligatoria');
+        if (!usuario) throw new Error('El usuario es obligatorio');
 
-const cambioEstadoReservaSchema = new mongoose.Schema({
-    fecha: {
-        type: Date,
-        required: true,
-        default: Date.now
-    },
-    estado: {
-        type: String,
-        required: true,
-        enum: ['pendiente', 'aprobada', 'rechazada', 'cancelada'] // o los que tengas
-    },
-    reserva: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Reserva',
-        required: true
-    },
-    motivo: {
-        type: String,
-        default: null
-    },
-    usuario: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Usuario',
-        required: true
+        const estadosValidos = ['pendiente', 'aprobada', 'rechazada', 'cancelada'];
+        if (!estadosValidos.includes(estado)) {
+            throw new Error(`Estado inválido: ${estado}`);
+        }
+
+        this.fecha = fecha;
+        this.estado = estado;
+        this.reserva = reserva;
+        this.motivo = motivo;
+        this.usuario = usuario;
     }
-}, { _id: false }); _
+}
 
-
-module.exports = cambioEstadoReservaSchema;
+module.exports = CambioEstadoReserva;

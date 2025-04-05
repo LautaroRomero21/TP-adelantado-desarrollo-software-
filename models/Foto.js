@@ -1,15 +1,15 @@
-const mongoose = require('mongoose');
+class Foto {
+    constructor({ descripcion, path }) {
+        if (!descripcion || typeof descripcion !== 'string') {
+            throw new Error('La descripción es obligatoria y debe ser un string');
+        }
+        if (!path || typeof path !== 'string') {
+            throw new Error('El path es obligatorio y debe ser un string');
+        }
 
-const fotoSchema = new mongoose.Schema({
-    descripcion: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    path: {
-        type: String,
-        required: true
+        this.descripcion = descripcion.trim();
+        this.path = path;
     }
-}, { _id: false }); // _id: false si no querés un ObjectId por cada foto
+}
 
-module.exports = fotoSchema;
+module.exports = Foto;

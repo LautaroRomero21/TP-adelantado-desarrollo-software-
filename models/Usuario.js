@@ -1,11 +1,21 @@
-const mongoose = require('mongoose');
+class Usuario {
+    constructor({ nombre, email, rol }) {
+        if (!nombre) throw new Error('El nombre es obligatorio');
+        if (!email) throw new Error('El email es obligatorio');
 
-const usuarioSchema = new mongoose.Schema({
-    nombre: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    rol: { type: String, enum: ['anfitrion', 'huesped'], required: true },
-}, {
-    timestamps: true
-});
+        const rolesValidos = ['anfitrion', 'huesped'];
+        if (!rolesValidos.includes(rol)) {
+            throw new Error(`Rol inválido: ${rol}`);
+        }
 
-module.exports = mongoose.model('Usuario', usuarioSchema);
+        this.nombre = nombre;
+        this.email = email;
+        this.rol = rol;
+
+        // timestamps
+        this.createdAt = new Date();
+        this.updatedAt = new Date();
+    }
+}
+
+module.exports = Usuario;

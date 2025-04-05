@@ -1,15 +1,11 @@
-const mongoose = require('mongoose');
+class Ciudad {
+    constructor({ nombre, pais }) {
+        if (!nombre) throw new Error('El nombre es obligatorio');
+        if (!pais) throw new Error('El país es obligatorio');
 
-const ciudadSchema = new mongoose.Schema({
-    nombre: {
-        type: String,
-        required: true
-    },
-    pais: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Pais',
-        required: true
+        this.nombre = nombre;
+        this.pais = pais;
     }
-});
+}
 
-module.exports = mongoose.model('Ciudad', ciudadSchema);
+module.exports = Ciudad;

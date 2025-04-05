@@ -1,27 +1,15 @@
-const mongoose = require('mongoose');
+class Direccion {
+    constructor({ calle, altura, ciudad, lat = null, long = null }) {
+        if (!calle) throw new Error('La calle es obligatoria');
+        if (typeof altura !== 'number') throw new Error('La altura debe ser un número');
+        if (!ciudad) throw new Error('La ciudad es obligatoria');
 
-const direccionSchema = new mongoose.Schema({
-    calle: {
-        type: String,
-        required: true
-    },
-    altura: {
-        type: Number,
-        required: true
-    },
-    ciudad: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Ciudad',
-        required: true
-    },
-    lat: {
-        type: Number,
-        required: false
-    },
-    long: {
-        type: Number,
-        required: false
+        this.calle = calle;
+        this.altura = altura;
+        this.ciudad = ciudad;
+        this.lat = lat;
+        this.long = long;
     }
-});
+}
 
-module.exports = mongoose.model('Direccion', direccionSchema);
+module.exports = Direccion;

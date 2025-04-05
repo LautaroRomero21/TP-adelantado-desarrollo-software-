@@ -1,24 +1,25 @@
-const mongoose = require('mongoose');
+class Notificacion {
+    constructor({ mensaje, usuario, fechaAlta = new Date(), leida = false, fechaLeida = null }) {
+        if (!mensaje || typeof mensaje !== 'string') {
+            throw new Error('El mensaje es obligatorio y debe ser un string');
+        }
+        if (!usuario) {
+            throw new Error('El usuario es obligatorio');
+        }
 
-const notificacionSchema = new mongoose.Schema({
-    mensaje: { type: String, required: true },
-    usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
-    fechaAlta: { type: Date, default: Date.now },
-    leida: { type: Boolean, default: false },
-    fechaLeida: { type: Date, default: null }
-}, {
-    timestamps: false
-});
+        this.mensaje = mensaje;
+        this.usuario = usuario;
+        this.fechaAlta = fechaAlta;
+        this.leida = leida;
+        this.fechaLeida = fechaLeida;
+    }
 
-/// ------------------------------
-/// Métodos personalizados
-/// ------------------------------
-notificacionSchema.methods.marcarComoLeida = function () {
-    this.leida = true;
-    this.fechaLeida = new Date();
-    return this.save(); // guarda el cambio en la DB
-};
+    marcarComoLeida() {
+        this.leida = true;
+        this.fechaLeida = new Date();
+        // En una clase sin base de datos, podrías devolver el objeto modificado
+        return this;
+    }
+}
 
-/// ------------------------------
-
-module.exports = mongoose.model('Notificacion', notificacionSchema);
+module.exports = Notificacion;
