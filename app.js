@@ -20,13 +20,13 @@ app.get('/health', (req, res) => {
 const reservaRoutes = require('./routes/ReservaRoutes');
 app.use('/reservas', reservaRoutes);
 
-// const notificacionRoutes = require('./routes/NotificacionRoutes');
-// app.use('/notificaciones', notificacionRoutes);
+const notificacionRoutes = require('./routes/NotificacionRoutes');
+app.use('/notificaciones', notificacionRoutes);
 
 const usuarioRoutes = require('./routes/UsuarioRoutes');
 app.use('/usuarios', usuarioRoutes);
 
-// const alojamientoRoutes = require('./routes/AlojamientoRoutes');
-// app.use('/alojamientos', alojamientoRoutes);
+const alojamientoRoutes = require('./routes/AlojamientoRoutes');
+app.use('/alojamientos', alojamientoRoutes);
 
 module.exports = app;
