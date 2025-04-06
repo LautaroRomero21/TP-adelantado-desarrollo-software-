@@ -1,7 +1,6 @@
-const Notificacion = require('../models/Notificacion');
 const notificacionService = require('../services/NotificacionService');
+const Notificacion = require('../models/Notificacion');
 
-// Mock de Notificacion
 jest.mock('../models/Notificacion');
 
 describe('NotificacionService', () => {
@@ -11,38 +10,56 @@ describe('NotificacionService', () => {
     });
 
     describe('getNotificaciones', () => {
-        it('debería devolver las notificaciones no leídas de un usuario', async () => {
-            const usuarioId = 'usuario123';
-            const mockData = [{ mensaje: 'Noti 1' }, { mensaje: 'Noti 2' }];
-            Notificacion.find.mockResolvedValue(mockData);
+        it('debería obtener notificaciones no leídas de un usuario', async () => {
+            const usuarioId = 'user123';
+            const notificacionesMock = [{ mensaje: 'Hola', leida: false }];
 
-            const result = await notificacionService.getNotificaciones(usuarioId, false);
+            Notificacion.find.mockResolvedValue(notificacionesMock);
+
+            const resultado = await notificacionService.getNotificaciones(usuarioId, false);
 
             expect(Notificacion.find).toHaveBeenCalledWith({ usuario: usuarioId, leida: false });
-            expect(result).toEqual(mockData);
+            expect(resultado).toEqual(notificacionesMock);
+        });
+
+        it('debería obtener notificaciones leídas de un usuario', async () => {
+            const usuarioId = 'user123';
+            const notificacionesMock = [{ mensaje: 'Adiós', leida: true }];
+
+            Notificacion.find.mockResolvedValue(notificacionesMock);
+
+            const resultado = await notificacionService.getNotificaciones(usuarioId, true);
+
+            expect(Notificacion.find).toHaveBeenCalledWith({ usuario: usuarioId, leida: true });
+            expect(resultado).toEqual(notificacionesMock);
         });
     });
 
     describe('marcarComoLeida', () => {
-        it('debería marcar una notificación como leída si existe', async () => {
-            const mockId = 'noti123';
-            const mockNoti = { marcarComoLeida: jest.fn(), _id: mockId };
-            Notificacion.findById.mockResolvedValue(mockNoti);
+        it('debería marcar una notificación como leída', async () => {
+            const notificacionId = 'notif123';
+            const notificacionMock = {
+                _id: notificacionId,
+                mensaje: 'Nueva reserva',
+                leida: false,
+                marcarComoLeida: jest.fn().mockResolvedValue(true)
+            };
 
-            const result = await notificacionService.marcarComoLeida(mockId);
+            Notificacion.findById.mockResolvedValue(notificacionMock);
 
-            expect(Notificacion.findById).toHaveBeenCalledWith(mockId);
-            expect(mockNoti.marcarComoLeida).toHaveBeenCalled();
-            expect(result).toEqual(mockNoti);
+            const resultado = await notificacionService.marcarComoLeida(notificacionId);
+
+            expect(Notificacion.findById).toHaveBeenCalledWith(notificacionId);
+            expect(notificacionMock.marcarComoLeida).toHaveBeenCalled();
+            expect(resultado).toEqual(notificacionMock);
         });
 
         it('debería lanzar error si la notificación no existe', async () => {
             Notificacion.findById.mockResolvedValue(null);
 
-            await expect(notificacionService.marcarComoLeida('noexiste')).rejects.toEqual({
-                status: 404,
-                message: 'Notificación no encontrada'
-            });
+            await expect(notificacionService.marcarComoLeida('noexiste'))
+                .rejects.toEqual({ status: 404, message: 'Notificación no encontrada' });
         });
     });
+
 });

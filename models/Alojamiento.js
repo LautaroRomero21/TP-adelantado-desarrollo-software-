@@ -6,7 +6,7 @@ const alojamientoSchema = new mongoose.Schema({
     nombre: { type: String, required: true },
     descripcion: { type: String, required: true },
     precioPorNoche: { type: Number, required: true },
-    moneda: { type: String, default: 'USD' },
+    moneda: { type: String, default: 'DOLAR_USA' },
     horarioCheckIn: { type: String },
     horarioCheckOut: { type: String },
     direccion: { type: mongoose.Schema.Types.ObjectId, ref: 'Direccion', required: true },

@@ -4,17 +4,11 @@ const reservaController = require('../controllers/ReservaController');
 
 /**
  * @swagger
- * tags:
- *   name: Reservas
- *   description: Operaciones relacionadas con reservas
- */
-
-/**
- * @swagger
- * /reservas:
+ * /reservas/crear:
  *   post:
  *     summary: Crear una nueva reserva
- *     tags: [Reservas]
+ *     tags:
+ *       - Reservas
  *     requestBody:
  *       required: true
  *       content:
@@ -22,28 +16,30 @@ const reservaController = require('../controllers/ReservaController');
  *           schema:
  *             type: object
  *             required:
- *               - alojamiento
- *               - huesped
+ *               - alojamientoId
+ *               - huespedId
  *               - fechaInicio
  *               - fechaFin
  *             properties:
- *               alojamiento:
+ *               alojamientoId:
  *                 type: string
- *                 example: "66110fdc5f1a2c894ef404b3"
- *               huesped:
+ *               huespedId:
  *                 type: string
- *                 example: "661110e65f1a2c894ef404b4"
  *               fechaInicio:
  *                 type: string
  *                 format: date
- *                 example: "2025-05-01"
  *               fechaFin:
  *                 type: string
  *                 format: date
- *                 example: "2025-05-05"
  *     responses:
- *       201:
- *         description: Reserva creada exitosamente
+ *       200:
+ *         description: Reserva creada exitosamente.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Reserva'
+ *       400:
+ *         description: Datos inválidos.
  */
 router.post('/crear', reservaController.crearReserva);
 
@@ -51,8 +47,9 @@ router.post('/crear', reservaController.crearReserva);
  * @swagger
  * /reservas/{id}/aceptar:
  *   patch:
- *     summary: Aceptar una reserva pendiente
- *     tags: [Reservas]
+ *     summary: Aceptar una reserva
+ *     tags:
+ *       - Reservas
  *     parameters:
  *       - in: path
  *         name: id
@@ -63,17 +60,25 @@ router.post('/crear', reservaController.crearReserva);
  *     responses:
  *       200:
  *         description: Reserva aceptada exitosamente
- *       400:
- *         description: La reserva no puede ser aceptada
+ *       404:
+ *         description: Reserva no encontrada
  */
 router.patch('/:id/aceptar', reservaController.aceptarReserva);
 
 /**
  * @swagger
- * /reservas:
- *   delete:
+ * /reservas/{id}/cancelar:
+ *   patch:
  *     summary: Cancelar una reserva
- *     tags: [Reservas]
+ *     tags:
+ *       - Reservas
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la reserva a cancelar
  *     requestBody:
  *       required: true
  *       content:
@@ -81,21 +86,18 @@ router.patch('/:id/aceptar', reservaController.aceptarReserva);
  *           schema:
  *             type: object
  *             required:
- *               - reservaId
  *               - usuarioId
  *             properties:
- *               reservaId:
- *                 type: string
- *                 example: "661118795f1a2c894ef404b5"
  *               usuarioId:
  *                 type: string
- *                 example: "661110e65f1a2c894ef404b4"
  *               motivo:
  *                 type: string
- *                 example: "Cambio de planes"
+ *                 description: Motivo de la cancelación (opcional)
  *     responses:
  *       200:
  *         description: Reserva cancelada exitosamente
+ *       404:
+ *         description: Reserva no encontrada
  */
 router.patch('/:id/cancelar', reservaController.cancelarReserva);
 
@@ -104,7 +106,8 @@ router.patch('/:id/cancelar', reservaController.cancelarReserva);
  * /reservas/usuario/{usuarioId}:
  *   get:
  *     summary: Obtener historial de reservas de un usuario
- *     tags: [Reservas]
+ *     tags:
+ *       - Reservas
  *     parameters:
  *       - in: path
  *         name: usuarioId
@@ -114,7 +117,15 @@ router.patch('/:id/cancelar', reservaController.cancelarReserva);
  *         description: ID del usuario
  *     responses:
  *       200:
- *         description: Lista de reservas del usuario
+ *         description: Lista de reservas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Reserva'
+ *       404:
+ *         description: Usuario no encontrado
  */
 router.get('/usuario/:usuarioId', reservaController.historialReservas);
 
@@ -122,33 +133,43 @@ router.get('/usuario/:usuarioId', reservaController.historialReservas);
  * @swagger
  * /reservas/{id}:
  *   put:
- *     summary: Modificar una reserva existente
- *     tags: [Reservas]
+ *     summary: Modificar fechas de una reserva
+ *     tags:
+ *       - Reservas
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: ID de la reserva a modificar
+ *         description: ID de la reserva
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - fechaInicio
+ *               - fechaFin
  *             properties:
  *               fechaInicio:
  *                 type: string
  *                 format: date
- *                 example: "2025-06-01"
  *               fechaFin:
  *                 type: string
  *                 format: date
- *                 example: "2025-06-05"
  *     responses:
  *       200:
  *         description: Reserva modificada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Reserva'
+ *       400:
+ *         description: Error de validación
+ *       404:
+ *         description: Reserva no encontrada
  */
 router.put('/:id', reservaController.modificarReserva);
 

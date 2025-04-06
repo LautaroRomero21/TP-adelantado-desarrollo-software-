@@ -1,7 +1,7 @@
 const Alojamiento = require('../models/Alojamiento');
 const Direccion = require('../models/Direccion');
 const Ciudad = require('../models/Ciudad');
-const Pais = require('../models/Pais'); // Asegúrate de tener el modelo de Pais
+const Pais = require('../models/Pais');
 
 const buscarAlojamientos = async (query) => {
     const {
@@ -83,8 +83,8 @@ const buscarAlojamientos = async (query) => {
 
     // Búsqueda de Alojamientos con los filtros aplicados
     const resultados = await Alojamiento.find(filtro)
-        .populate('direccion') // opcional, para traer la información de la dirección
-        .populate('anfitrion', 'nombre apellido') // opcional, para traer información del anfitrión
+        .populate('direccion')
+        .populate('anfitrion', 'nombre apellido')
         .skip((page - 1) * limit)
         .limit(Number(limit));
 
