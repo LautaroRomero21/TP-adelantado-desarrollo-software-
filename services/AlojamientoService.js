@@ -1,5 +1,7 @@
 const Alojamiento = require('../models/Alojamiento');
-const Direccion = require('../models/Direccion'); // para población si es necesario
+const Direccion = require('../models/Direccion');
+const Ciudad = require('../models/Ciudad');
+const Pais = require('../models/Pais'); // Asegúrate de tener el modelo de Pais
 
 const buscarAlojamientos = async (query) => {
     const {
@@ -15,37 +17,74 @@ const buscarAlojamientos = async (query) => {
 
     const filtro = {};
 
-    // Precio
+    // Filtro de Precio
     if (minPrecio || maxPrecio) {
         filtro.precioPorNoche = {};
         if (minPrecio) filtro.precioPorNoche.$gte = Number(minPrecio);
         if (maxPrecio) filtro.precioPorNoche.$lte = Number(maxPrecio);
     }
 
-    // Capacidad
+    // Filtro de Capacidad
     if (capacidad) {
         filtro.cantHuespedesMax = { $gte: Number(capacidad) };
     }
 
-    // Características
+    // Filtro de Características
     if (caracteristicas) {
-        const arrayCaracteristicas = caracteristicas.split(',');
+        const arrayCaracteristicas = caracteristicas.split(',').map(caracteristica => caracteristica.trim());
         filtro.caracteristicas = { $all: arrayCaracteristicas };
     }
 
-    // Filtro por ubicación en Direccion
+    // Filtro por Ubicación (Ciudad, País)
     if (ciudad || pais) {
-        const direcciones = await Direccion.find({
-            ...(ciudad && { ciudad }),
-            ...(pais && { pais })
-        }).select('_id');
-        const idsDireccion = direcciones.map(dir => dir._id);
-        filtro.direccion = { $in: idsDireccion };
+        let ciudadId;
+
+        // Si se pasa la ciudad, buscamos el ObjectId de la ciudad
+        if (ciudad) {
+            const ciudadEncontrada = await Ciudad.findOne({ nombre: ciudad }).populate('pais');
+            if (ciudadEncontrada) {
+                ciudadId = ciudadEncontrada._id;
+            } else {
+                throw new Error("Ciudad no encontrada");
+            }
+        }
+
+        // Si se pasa el país, buscamos todas las ciudades del país
+        if (pais) {
+            const paisEncontrado = await Pais.findOne({ nombre: pais });
+            if (!paisEncontrado) {
+                throw new Error("País no encontrado");
+            }
+
+            // Si no se pasó la ciudad, buscamos todas las ciudades de ese país
+            if (!ciudadId) {
+                const ciudadesDelPais = await Ciudad.find({ pais: paisEncontrado._id }).select('_id');
+                const idsCiudad = ciudadesDelPais.map(ciudad => ciudad._id);
+                // Si se pasa solo el país, filtramos las direcciones asociadas a esas ciudades
+                const direcciones = await Direccion.find({ ciudad: { $in: idsCiudad } }).select('_id');
+                if (direcciones.length === 0) {
+                    throw new Error("No se encontraron direcciones para el país especificado.");
+                }
+                const idsDireccion = direcciones.map(dir => dir._id);
+                filtro.direccion = { $in: idsDireccion };
+            }
+        }
+
+        // Si se pasó una ciudad, filtramos por las direcciones de esa ciudad
+        if (ciudadId) {
+            const direcciones = await Direccion.find({ ciudad: ciudadId }).select('_id');
+            if (direcciones.length === 0) {
+                throw new Error("No se encontraron direcciones para la ciudad.");
+            }
+            const idsDireccion = direcciones.map(dir => dir._id);
+            filtro.direccion = { $in: idsDireccion };
+        }
     }
 
+    // Búsqueda de Alojamientos con los filtros aplicados
     const resultados = await Alojamiento.find(filtro)
-        .populate('direccion') // opcional
-        .populate('anfitrion', 'nombre apellido') // opcional
+        .populate('direccion') // opcional, para traer la información de la dirección
+        .populate('anfitrion', 'nombre apellido') // opcional, para traer información del anfitrión
         .skip((page - 1) * limit)
         .limit(Number(limit));
 
