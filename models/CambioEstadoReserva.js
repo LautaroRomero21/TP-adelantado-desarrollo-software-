@@ -9,7 +9,7 @@ const cambioEstadoReservaSchema = new mongoose.Schema({
     estado: {
         type: String,
         required: true,
-        enum: ['pendiente', 'aprobada', 'rechazada', 'cancelada'] // o los que tengas
+        enum: ['pendiente', 'confirmada', 'rechazada', 'cancelada']
     },
     reserva: {
         type: mongoose.Schema.Types.ObjectId,

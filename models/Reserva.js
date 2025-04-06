@@ -5,10 +5,14 @@ const reservaSchema = new mongoose.Schema({
     huesped: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
     fechaInicio: { type: Date, required: true },
     fechaFin: { type: Date, required: true },
-    estado: { type: String, enum: ['pendiente', 'confirmada', 'cancelada'], default: 'pendiente' },
+    estado: { type: String, enum: ['pendiente', 'confirmada', 'cancelada'], default: 'pendiente' }
 }, {
     timestamps: true
 });
 
-module.exports = mongoose.model('Reserva', reservaSchema);
+reservaSchema.methods.cambiarEstado = function (estado) {
+    this.estado = estado;
+    this.updatedAt = new Date();
+};
 
+module.exports = mongoose.model('Reserva', reservaSchema);

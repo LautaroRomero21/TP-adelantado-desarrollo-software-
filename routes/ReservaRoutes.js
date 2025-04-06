@@ -49,6 +49,27 @@ router.post('/crear', reservaController.crearReserva);
 
 /**
  * @swagger
+ * /reservas/{id}/aceptar:
+ *   patch:
+ *     summary: Aceptar una reserva pendiente
+ *     tags: [Reservas]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la reserva a aceptar
+ *     responses:
+ *       200:
+ *         description: Reserva aceptada exitosamente
+ *       400:
+ *         description: La reserva no puede ser aceptada
+ */
+router.patch('/:id/aceptar', reservaController.aceptarReserva);
+
+/**
+ * @swagger
  * /reservas:
  *   delete:
  *     summary: Cancelar una reserva

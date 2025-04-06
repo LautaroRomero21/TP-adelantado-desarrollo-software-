@@ -10,6 +10,17 @@ const crearReserva = async (req, res) => {
     }
 };
 
+// Aceptar una reserva
+const aceptarReserva = async (req, res) => {
+    try {
+        const reservaId = req.params.id;
+        const mensaje = await reservaService.aceptarReserva(reservaId);
+        res.json({ mensaje });
+    } catch (err) {
+        res.status(err.status || 500).json({ error: err.message });
+    }
+};
+
 // Cancelar una reserva
 const cancelarReserva = async (req, res) => {
     try {
@@ -21,8 +32,6 @@ const cancelarReserva = async (req, res) => {
         res.status(err.status || 500).json({ error: err.message });
     }
 };
-
-
 
 // Obtener historial de reservas de un usuario
 const historialReservas = async (req, res) => {
@@ -46,6 +55,7 @@ const modificarReserva = async (req, res) => {
 
 module.exports = {
     crearReserva,
+    aceptarReserva,
     cancelarReserva,
     historialReservas,
     modificarReserva
