@@ -13,12 +13,16 @@ const crearReserva = async (req, res) => {
 // Cancelar una reserva
 const cancelarReserva = async (req, res) => {
     try {
-        const mensaje = await reservaService.cancelarReserva(req.params.id);
+        const reservaId = req.params.id; // lo sacás de la URL
+        const { usuarioId, motivo } = req.body; // el resto sigue viniendo por body
+        const mensaje = await reservaService.cancelarReserva(reservaId, usuarioId, motivo);
         res.json({ mensaje });
     } catch (err) {
         res.status(err.status || 500).json({ error: err.message });
     }
 };
+
+
 
 // Obtener historial de reservas de un usuario
 const historialReservas = async (req, res) => {

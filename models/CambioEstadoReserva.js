@@ -25,7 +25,8 @@ const cambioEstadoReservaSchema = new mongoose.Schema({
         ref: 'Usuario',
         required: true
     }
-}, { _id: false }); _
+});
 
 
-module.exports = cambioEstadoReservaSchema;
+module.exports = mongoose.model('CambioEstadoReserva', cambioEstadoReservaSchema);
+

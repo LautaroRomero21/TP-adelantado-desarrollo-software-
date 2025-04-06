@@ -10,6 +10,6 @@ const fotoSchema = new mongoose.Schema({
         type: String,
         required: true
     }
-}, { _id: false }); // _id: false si no querés un ObjectId por cada foto
+}, { _id: false });
 
 module.exports = fotoSchema;

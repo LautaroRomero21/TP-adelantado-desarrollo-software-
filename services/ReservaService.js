@@ -1,13 +1,14 @@
 const mongoose = require('mongoose');
 const Reserva = require('../models/Reserva');
 const Alojamiento = require('../models/Alojamiento');
+const CambioEstadoReserva = require('../models/CambioEstadoReserva');
+
 
 const crearReserva = async ({ alojamientoId, huespedId, fechaInicio, fechaFin }) => {
-    // Asegurarse de que las fechas sean objetos Date
     fechaInicio = new Date(fechaInicio);
     fechaFin = new Date(fechaFin);
 
-    // Verificar que las fechas sean válidas
+    // Verificar que las fechas sean validas
     if (isNaN(fechaInicio) || isNaN(fechaFin)) {
         throw { status: 400, message: 'Fechas inválidas' };
     }
@@ -53,19 +54,33 @@ const crearReserva = async ({ alojamientoId, huespedId, fechaInicio, fechaFin })
     return nuevaReserva;
 };
 
-const cancelarReserva = async (reservaId) => {
+const cancelarReserva = async (reservaId, usuarioId, motivo) => {
     const reserva = await Reserva.findById(reservaId);
     if (!reserva) throw { status: 404, message: 'Reserva no encontrada' };
+
+    if (!usuarioId || !reservaId) {
+        throw { status: 400, message: 'Faltan datos obligatorios para cancelar la reserva' };
+    }
 
     const ahora = new Date();
     if (reserva.fechaInicio <= ahora)
         throw { status: 400, message: 'No se puede cancelar una reserva ya iniciada o pasada' };
 
+    // Cambiar el estado
     reserva.estado = 'cancelada';
     await reserva.save();
 
+    // Registrar el cambio de estado con motivo personalizado
+    await CambioEstadoReserva.create({
+        reserva: reserva._id,
+        estado: 'cancelada',
+        motivo: motivo || 'Sin especificar',
+        usuario: usuarioId
+    });
+
     return 'Reserva cancelada exitosamente';
 };
+
 
 const historialReservas = async (usuarioId) => {
     return await Reserva.find({ huesped: usuarioId }).populate('alojamiento');

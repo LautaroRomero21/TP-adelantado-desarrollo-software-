@@ -45,26 +45,38 @@ const reservaController = require('../controllers/ReservaController');
  *       201:
  *         description: Reserva creada exitosamente
  */
-router.post('/', reservaController.crearReserva);
+router.post('/crear', reservaController.crearReserva);
 
 /**
  * @swagger
- * /reservas/{id}:
+ * /reservas:
  *   delete:
  *     summary: Cancelar una reserva
  *     tags: [Reservas]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID de la reserva a cancelar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - reservaId
+ *               - usuarioId
+ *             properties:
+ *               reservaId:
+ *                 type: string
+ *                 example: "661118795f1a2c894ef404b5"
+ *               usuarioId:
+ *                 type: string
+ *                 example: "661110e65f1a2c894ef404b4"
+ *               motivo:
+ *                 type: string
+ *                 example: "Cambio de planes"
  *     responses:
  *       200:
  *         description: Reserva cancelada exitosamente
  */
-router.delete('/:id', reservaController.cancelarReserva);
+router.patch('/:id/cancelar', reservaController.cancelarReserva);
 
 /**
  * @swagger
