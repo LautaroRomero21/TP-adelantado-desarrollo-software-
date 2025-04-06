@@ -7,8 +7,10 @@ class FactoryNotificacion {
     }
 
     crearNotificacionReservaRealizada(reserva) {
-        const { huespedReservador, rangoFechas, alojamiento } = reserva;
-        const mensaje = `El usuario ${huespedReservador.nombre} ha realizado una reserva del ${rangoFechas.fechaInicio} al ${rangoFechas.fechaFin} para el alojamiento ${alojamiento.nombre}.`;
+        const { huespedReservador, fechaInicio, fechaFin, alojamiento } = reserva;
+        const dias = Math.ceil((new Date(fechaFin) - new Date(fechaInicio)) / (1000 * 60 * 60 * 24));
+
+        const mensaje = `El usuario ${huespedReservador.nombre} ha realizado una reserva del ${fechaInicio.toLocaleDateString()} al ${fechaFin.toLocaleDateString()} (${dias} días) para el alojamiento "${alojamiento.nombre}".`;
 
         return new Notificacion({
             mensaje,
@@ -17,6 +19,7 @@ class FactoryNotificacion {
             leida: false
         });
     }
+
 
     crearNotificacionReservaConfirmada(reserva) {
         const { huespedReservador, rangoFechas, alojamiento } = reserva;

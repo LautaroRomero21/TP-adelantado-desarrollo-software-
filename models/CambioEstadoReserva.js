@@ -10,7 +10,7 @@ class CambioEstadoReserva {
         if (!reserva) throw new Error('La reserva es obligatoria');
         if (!usuario) throw new Error('El usuario es obligatorio');
 
-        const estadosValidos = ['pendiente', 'aprobada', 'rechazada', 'cancelada'];
+        const estadosValidos = ['pendiente', 'confirmada', 'rechazada', 'cancelada'];
         if (!estadosValidos.includes(estado)) {
             throw new Error(`Estado inválido: ${estado}`);
         }

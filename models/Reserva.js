@@ -20,6 +20,11 @@ class Reserva {
         this.createdAt = new Date();
         this.updatedAt = new Date();
     }
+
+    cambiarEstado(estado) {
+        this.estado = estado;
+        this.updatedAt = new Date();
+    }
 }
 
 module.exports = Reserva;
