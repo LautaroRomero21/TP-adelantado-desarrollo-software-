@@ -1,16 +1,41 @@
+const mongoose = require('mongoose');
 const Reserva = require('../models/Reserva');
 const Alojamiento = require('../models/Alojamiento');
 
 const crearReserva = async ({ alojamientoId, huespedId, fechaInicio, fechaFin }) => {
-    const alojamiento = await Alojamiento.findById(alojamientoId).populate('reservas');
-    if (!alojamiento) throw { status: 404, message: 'Alojamiento no encontrado' };
+    // Asegurarse de que las fechas sean objetos Date
+    fechaInicio = new Date(fechaInicio);
+    fechaFin = new Date(fechaFin);
 
-    const haySuperposicion = alojamiento.reservas.some(reserva =>
-        (fechaInicio < reserva.fechaFin && fechaFin > reserva.fechaInicio)
-    );
+    // Verificar que las fechas sean válidas
+    if (isNaN(fechaInicio) || isNaN(fechaFin)) {
+        throw { status: 400, message: 'Fechas inválidas' };
+    }
 
-    if (haySuperposicion) throw { status: 400, message: 'El alojamiento no está disponible en esas fechas' };
+    // Verificar que la fecha de inicio no sea posterior a la de fin
+    if (fechaInicio >= fechaFin) {
+        throw { status: 400, message: 'La fecha de inicio debe ser anterior a la de fin' };
+    }
 
+    // Buscar el alojamiento
+    const alojamiento = await Alojamiento.findById(alojamientoId);
+    if (!alojamiento) {
+        throw { status: 404, message: 'Alojamiento no encontrado' };
+    }
+
+    // Buscar reservas que se solapan con las fechas propuestas
+    const reservasConflicto = await Reserva.find({
+        alojamiento: alojamientoId,
+        $or: [
+            { fechaInicio: { $lt: fechaFin }, fechaFin: { $gt: fechaInicio } }
+        ]
+    });
+
+    if (reservasConflicto.length > 0) {
+        throw { status: 400, message: 'El alojamiento no está disponible en esas fechas' };
+    }
+
+    // Crear la nueva reserva
     const nuevaReserva = new Reserva({
         alojamiento: alojamientoId,
         huesped: huespedId,
@@ -18,7 +43,10 @@ const crearReserva = async ({ alojamientoId, huespedId, fechaInicio, fechaFin })
         fechaFin
     });
 
+    // Guardar la nueva reserva
     await nuevaReserva.save();
+
+    // Actualizar el array de reservas en el alojamiento
     alojamiento.reservas.push(nuevaReserva._id);
     await alojamiento.save();
 
